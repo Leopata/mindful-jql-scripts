@@ -29,6 +29,23 @@ const readQueryFile = (filename) => {
   });
 };
 
+const buildOutputFile = (ids) => {
+  const content = ids.map(id => ({ $distinct_id: id, $token: mixpanelApiToken, $delete: '' }));
+  return writeFile('output.json', JSON.stringify(content));
+};
+
+const writeFile = (file, content) => {
+  return new Promise((resolve, reject) => {
+    fs.writeFile(file, content, (err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(file);
+      }
+    })
+  });
+};
+
 const deleteUsers = (distinctIds) => {
   let remainingIds = distinctIds;
 
@@ -40,8 +57,8 @@ const deleteUsers = (distinctIds) => {
 
     const data = chunk.map(id => ({ $token: mixpanelApiToken, $distinct_id: id, $delete: '' }));
     const enc = new Buffer(JSON.stringify(data)).toString('base64');
-    const uri = getURL('engage', { verbose: 1, ignore_time: true, ip: 0, data: enc });
-    return request(uri).then(res => {
+    const uri = getURL('engage', { verbose: 1, ignore_time: true, ip: 0 });
+    return request({ uri: uri, method: 'POST', form: { data: enc }, json: true }).then(res => {
       if (remainingIds.length > 0) {
         return sendBatch();
       }
@@ -77,6 +94,7 @@ const getURL = (endpoint, opts) => {
 
 readQueryFile('query.js')
   .then(file => executeJQL(file))
-  .then(ids => deleteUsers(ids))
+  .then(ids => buildOutputFile(ids))
+  // .then(ids => deleteUsers(ids))
   .then(json => console.log(`Finished with ${JSON.stringify(json)}`))
   .catch(error => console.error(error));
