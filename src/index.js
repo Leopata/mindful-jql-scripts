@@ -38,7 +38,7 @@ const deleteUsers = (distinctIds) => {
 
     console.log(`Deleting ${chunk.length} users...`);
 
-    const data = chunk.map(id => ({ $token: mixpanelApiToken, distinct_id: id, $delete: '' }));
+    const data = chunk.map(id => ({ $token: mixpanelApiToken, $distinct_id: id, $delete: '' }));
     const enc = new Buffer(JSON.stringify(data)).toString('base64');
     const uri = getURL('engage', { verbose: 1, ignore_time: true, ip: 0, data: enc });
     return request(uri).then(res => {
