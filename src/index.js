@@ -6,18 +6,14 @@ dotenv.config();
 const endpoint = 'https://mixpanel.com/api/2.0/jql';
 const apiKey = process.env.MIXPANEL_API_SECRET;
 const apiKeyBase64 = new Buffer(`${apiKey}:`).toString('base64');
+const authHeader = { 'Authorization': `Basic ${apiKeyBase64}` };
 
 // Call Mixpanel API with the JQL script
-const execQuery = (jql) => {
+const executeJQL = (jql) => {
   const encodedQuery = encodeURIComponent(jql);
   const uri = `${endpoint}?script=${encodedQuery}`;
-  const options = {
-    uri: uri,
-    headers: { 'Authorization': `Basic ${apiKeyBase64}` },
-    method: 'POST',
-    json: true
-  };
-  return request(options);
+  const opts = { uri: uri, headers: authHeader, json: true };
+  return request(opts);
 };
 
 // Load the JQL format file
@@ -34,10 +30,13 @@ const readQueryFile = (filename) => {
 // Make something useful with the JQL response
 const processJsonResponse = (json) => {
   const distinctIds = json;
-  console.log(`${distinctIds.length} distinct ids found !`)
+  console.log(`${distinctIds.length} distinct ids found !`);
+
+  const samples = distinctIds.slice(1, 10);
+  console.log(samples);
 };
 
 readQueryFile('query.js')
-  .then(file => execQuery(file))
+  .then(file => executeJQL(file))
   .then(json => processJsonResponse(json))
   .catch(error => console.error(error));
