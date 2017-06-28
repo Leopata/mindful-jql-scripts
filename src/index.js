@@ -31,12 +31,15 @@ const readQueryFile = (filename) => {
 const processJsonResponse = (json) => {
   const distinctIds = json;
   console.log(`${distinctIds.length} distinct ids found !`);
+  return distinctIds.slice(1, 2);
+};
 
-  const samples = distinctIds.slice(1, 10);
-  console.log(samples);
+const deleteUsers = (distinctIds) => {
+  console.log(distinctIds);
 };
 
 readQueryFile('query.js')
   .then(file => executeJQL(file))
   .then(json => processJsonResponse(json))
+  .then(distinctIds => deleteUsers(distinctIds))
   .catch(error => console.error(error));
