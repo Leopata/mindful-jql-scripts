@@ -55,10 +55,12 @@ const deleteUsers = (distinctIds) => {
 
     console.log(`Deleting ${chunk.length} users...`);
 
-    const data = chunk.map(id => ({ $token: mixpanelApiToken, $distinct_id: id, $delete: '' }));
+    const data = chunk.map(id => ({ $token: mixpanelApiToken, $distinct_id: id, $delete: true, $ignore_alias: true }));
     const enc = new Buffer(JSON.stringify(data)).toString('base64');
-    const uri = getURL('engage', { verbose: 1, ignore_time: true, ip: 0 });
-    return request({ uri: uri, method: 'POST', form: { data: enc }, json: true }).then(res => {
+    const uri = `https://api.mixpanel.com/engage?data=${enc}&verbose=1`;
+    console.log(uri);
+    return request(uri).then(res => {
+      console.log(res);
       if (remainingIds.length > 0) {
         return sendBatch();
       }
@@ -69,32 +71,9 @@ const deleteUsers = (distinctIds) => {
   return sendBatch();
 };
 
-const getURL = (endpoint, opts) => {
-  const expirationTime = 10; // expressed in mins
-  opts.api_key = mixpanelApiKey;
-  opts.expire = Math.round(Date.now() / 1000) + 60 * expirationTime;
-
-  const sortedKeys = Object.keys(opts).sort();
-  const params = [];
-  let concatKeys = "";
-
-  for (let i = 0; i < sortedKeys.length; i++) {
-    const key = sortedKeys[i];
-    params.push(`${key}=${opts[key]}`);
-    concatKeys += params[params.length - 1];
-  }
-
-  let sig = crypto
-    .createHash('md5')
-    .update(concatKeys + mixpanelApiSecret)
-    .digest('hex');
-
-  return `https://api.mixpanel.com/${endpoint}/?${params.join('&')}&sig=${sig}`;
-};
-
 readQueryFile('query.js')
   .then(file => executeJQL(file))
-  .then(ids => buildOutputFile(ids))
-  // .then(ids => deleteUsers(ids))
+  // .then(ids => buildOutputFile(ids))
+  .then(ids => deleteUsers(ids))
   .then(json => console.log(`Finished with ${JSON.stringify(json)}`))
   .catch(error => console.error(error));
