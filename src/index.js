@@ -30,8 +30,9 @@ const readQueryFile = (filename) => {
 };
 
 const buildOutputFile = (ids) => {
-  const content = ids.map(id => ({ $distinct_id: id, $token: mixpanelApiToken, $delete: '' }));
-  return writeFile('output.json', JSON.stringify(content));
+  console.log(`Found ${ids.length} users to delete.`);
+  const content = ids.map(id => (`${id}\n`));
+  return writeFile('output.txt', content);
 };
 
 const writeFile = (file, content) => {
@@ -47,18 +48,20 @@ const writeFile = (file, content) => {
 };
 
 const deleteUsers = (distinctIds) => {
+  console.log(`Found ${distinctIds.length} users to delete.`);
+
   let remainingIds = distinctIds;
 
   const batchSize = 50;
   const sendBatch = () => {
     const chunk = remainingIds.splice(0, batchSize);
 
-    console.log(`Deleting ${chunk.length} users...`);
+    console.log(`> Deleting ${chunk.length} users...`);
 
     const data = chunk.map(id => ({ $token: mixpanelApiToken, $distinct_id: id, $delete: true, $ignore_alias: true }));
     const enc = new Buffer(JSON.stringify(data)).toString('base64');
     const uri = `https://api.mixpanel.com/engage?data=${enc}&verbose=1`;
-    console.log(uri);
+
     return request(uri).then(res => {
       console.log(res);
       if (remainingIds.length > 0) {
@@ -71,9 +74,19 @@ const deleteUsers = (distinctIds) => {
   return sendBatch();
 };
 
-readQueryFile('query.js')
-  .then(file => executeJQL(file))
-  // .then(ids => buildOutputFile(ids))
-  .then(ids => deleteUsers(ids))
-  .then(json => console.log(`Finished with ${JSON.stringify(json)}`))
-  .catch(error => console.error(error));
+
+if (process.env.DELETE_ALL && process.env.DELETE_ALL === 'true') {
+  console.warn('= Delete all mode ON');
+
+  readQueryFile('query.js')
+    .then(file => executeJQL(file))
+    .then(ids => deleteUsers(ids))
+    .catch(error => console.error(error));
+} else {
+  console.log('= Dry run mode ON');
+
+  readQueryFile('query.js')
+    .then(file => executeJQL(file))
+    .then(ids => buildOutputFile(ids))
+    .catch(error => console.error(error));
+}
