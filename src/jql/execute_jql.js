@@ -20,3 +20,21 @@ export const readQueryFile = (filename) => {
     })
   })
 }
+
+// Update people in batch
+export const batchEngage = (payloads) => {
+  let remainingPayloads = payloads
+  const batchSize = 50
+  const sendBatch = () => {
+    const chunk = remainingPayloads.splice(0, batchSize)
+    const enc = new Buffer(JSON.stringify(chunk)).toString('base64')
+    const uri = `https://api.mixpanel.com/engage?data=${enc}&verbose=1`
+    return request(uri).then(res => {
+      if (remainingPayloads.length > 0) {
+        return sendBatch()
+      }
+      return res
+    })
+  }
+  return sendBatch()
+}
