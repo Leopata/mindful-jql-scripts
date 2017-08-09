@@ -35,7 +35,7 @@ const updateUsersWithCorrectDate = ({ users, mixpanel }) => {
 }
 
 export default function updateFirstVisits({ mixpanel } = {}) {
-  readQueryFile('invalid_user_first_visits.js')
+  return readQueryFile('invalid_user_first_visits.js')
     .then(jql => executeJQL({ mixpanel, jql }))
     .then(filterInvalidUsers)
     .then(users => updateUsersWithCorrectDate({ users, mixpanel }))
