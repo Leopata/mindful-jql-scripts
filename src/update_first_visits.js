@@ -1,4 +1,3 @@
-import request from 'request-promise'
 import { readQueryFile, executeJQL, batchEngage } from './jql/execute_jql'
 
 const filterInvalidUsers = (users) => {

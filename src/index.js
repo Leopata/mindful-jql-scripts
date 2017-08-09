@@ -1,8 +1,9 @@
 import dotenv from 'dotenv';
-dotenv.config();
-
 import removeDuplicates from './delete_duplicates'
 import updateFirstVisits from './update_first_visits'
+import fixEventNames from './fix_event_naming'
+
+dotenv.config()
 
 const mixpanel = {
   key: process.env.MIXPANEL_API_KEY,
@@ -10,6 +11,6 @@ const mixpanel = {
   token: process.env.MIXPANEL_API_TOKEN
 }
 
-updateFirstVisits({ mixpanel })
-
-// removeDuplicates(false)
+removeDuplicates()
+// updateFirstVisits({ mixpanel })
+// fixEventNames({ mixpanel })
