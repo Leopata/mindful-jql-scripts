@@ -4,7 +4,10 @@ function main() {
     to_date: '2018-01-01'
   })
   .groupByUser((state, events) => {
-    const sortedEvents = events.sort((a, b) => a.time - b.time)
-    return sortedEvents[0].time
+    const eventTime = events[0].time
+    if (state !== undefined && state < eventTime) {
+      return state
+    }
+    return eventTime
   })
 }

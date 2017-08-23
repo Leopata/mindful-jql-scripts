@@ -3,7 +3,7 @@ import { readQueryFile, executeJQL, batchEngage } from './jql/execute_jql'
 const formatTuples = (tuples) => tuples.map(tuple => ({
   id: tuple.key[0], date: tuple.value
 }))
-// .filter(item => item.id === 'pierre.weill@gmail.com')
+// .filter(item => item.id === '546D2BB2-8D58-4319-8AE6-6FC46790692A')
 
 /// Agregate all user infos
 const agregateUserInfos = (usersWithFirstVisit, usersWithFirstEventDate) => {
@@ -33,11 +33,19 @@ const normalizeAgregation = (aggr) => {
   return aggr.map(aggr => {
     const firstEventDate = aggr.firstEventDate
     const firstVisitDate = aggr.firstVisit
+
+    console.log(`\nDistinct Id: ${aggr.distinctId}`)
+    console.log(`==> First Event Date: ${firstEventDate}`)
+    console.log(`==> First Visit Date: ${firstVisitDate}`)
+
     if (firstEventDate.getTime() < firstVisitDate.getTime()) {
       aggr.firstVisit = aggr.firstEventDate
     } else {
       aggr.firstVisit = firstVisitDate
     }
+
+    console.log(`==> Resolved First Visit Date: ${aggr.firstVisit}`)
+
     return aggr
   })
 }
@@ -64,6 +72,14 @@ export default function updateFirstVisitsBaseOnFirstEvent({ mixpanel } = {}) {
   return readQueryFile('first_user_event.js')
     .then(jql => executeJQL({ mixpanel, jql }))
     .then(formatTuples)
+    // .then(data => {
+    //   data.forEach(data => {
+    //     const distinctId = data.id
+    //     const date = (new Date(data.date)).toISOString()
+    //     console.log(`${distinctId}: ${date}`)
+    //   })
+    //   return data
+    // })
     .then(usersWithFirstEventDate => getUsersFirstVisit({ mixpanel }, usersWithFirstEventDate))
     .then(normalizeAgregation)
     .then(users => updateUsersWithFirstVisit({ mixpanel }, users))
