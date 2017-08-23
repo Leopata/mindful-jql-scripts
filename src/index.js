@@ -12,7 +12,8 @@ const mixpanel = {
   token: process.env.MIXPANEL_API_TOKEN
 }
 
+// Uncomment the line below to delete inactive and duplicates users
 // removeDuplicates()
-// updateFirstVisits({ mixpanel })
-// fixEventNames({ mixpanel })
-updateFirstVisitsBaseOnFirstEvent({ mixpanel });
+
+// Uncomment the line below to fix first-visit on users
+// updateFirstVisitsBaseOnFirstEvent({ mixpanel })

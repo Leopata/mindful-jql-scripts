@@ -1,6 +1,16 @@
 # Mixpanel JQL
 
+There are 2 scripts to correctly format mixpanel data.
+To run those script you must manually uncomment the script you want to run inside the `index.js` file.
+
+## Delete inactive users
+
 Destroy all Mixpanel people inactive since 2017-01-01.
+
+## Fix first-visit on users
+
+On Android, the `first-visit` mixpanel property is set at signup. Which is the wrong behavior.
+The script will update all `first-visit` and set it to the first event time.
 
 ## Setup
 
