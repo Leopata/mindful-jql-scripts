@@ -4,15 +4,11 @@ import crypto from 'crypto';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const mixpanelApiKey = process.env.MIXPANEL_API_KEY;
-const mixpanelApiSecret = process.env.MIXPANEL_API_SECRET;
-const mixpanelApiToken = process.env.MIXPANEL_API_TOKEN;
-
-const mixpanelBase64Secret = new Buffer(`${mixpanelApiSecret}:`).toString('base64');
-const authHeader = { 'Authorization': `Basic ${mixpanelBase64Secret}` };
 
 // Call Mixpanel API with the JQL script
-const executeJQL = (jql) => {
+const executeJQL = (mixpanel, jql) => {
+  const mixpanelBase64Secret = new Buffer(`${mixpanel.secret}:`).toString('base64');
+  const authHeader = { 'Authorization': `Basic ${mixpanelBase64Secret}` };
   const encodedQuery = encodeURIComponent(jql);
   const uri = `https://mixpanel.com/api/2.0/jql?script=${encodedQuery}`;
   return request({ uri: uri, headers: authHeader, json: true });
@@ -47,7 +43,7 @@ const writeFile = (file, content) => {
   });
 };
 
-const deleteUsers = (distinctIds) => {
+const deleteUsers = (mixpanel, distinctIds) => {
   console.log(`Found ${distinctIds.length} users to delete.`);
 
   let remainingIds = distinctIds;
@@ -58,7 +54,7 @@ const deleteUsers = (distinctIds) => {
 
     console.log(`> Deleting ${chunk.length} users...`);
 
-    const data = chunk.map(id => ({ $token: mixpanelApiToken, $distinct_id: id, $delete: true, $ignore_alias: true }));
+    const data = chunk.map(id => ({ $token: mixpanel.token, $distinct_id: id, $delete: true, $ignore_alias: true }));
     const enc = new Buffer(JSON.stringify(data)).toString('base64');
     const uri = `https://api.mixpanel.com/engage?data=${enc}&verbose=1`;
 
@@ -74,19 +70,19 @@ const deleteUsers = (distinctIds) => {
   return sendBatch();
 };
 
-export default function removeDuplicates(dryRun = true) {
+export default function removeDuplicates(dryRun, mixpanel) {
   if (!dryRun) {
     console.warn('= Delete all mode ON');
 
     readQueryFile('duplicate_user_query.js')
-      .then(file => executeJQL(file))
-      .then(ids => deleteUsers(ids))
+      .then(file => executeJQL(mixpanel, file))
+      .then(ids => deleteUsers(mixpanel, ids))
       .catch(error => console.error(error));
   } else {
     console.log('= Dry run mode ON');
 
     readQueryFile('duplicate_user_query.js')
-      .then(file => executeJQL(file))
+      .then(file => executeJQL(mixpanel, file))
       .then(ids => buildOutputFile(ids))
       .catch(error => console.error(error));
   }
