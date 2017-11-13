@@ -1,7 +1,8 @@
+// Getting the users with no events in a date range
 function main() {
   return join(
     Events({
-      from_date: '2017-08-01',
+      from_date: '2017-09-01',
       to_date: '2018-01-01'
     }),
     People(),
