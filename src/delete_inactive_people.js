@@ -74,14 +74,14 @@ export default function removeDuplicates(dryRun, mixpanel) {
   if (!dryRun) {
     console.warn('= Delete all mode ON');
 
-    readQueryFile('duplicate_user_query.js')
+    readQueryFile('inactive_people_query.js')
       .then(file => executeJQL(mixpanel, file))
       .then(ids => deleteUsers(mixpanel, ids))
       .catch(error => console.error(error));
   } else {
     console.log('= Dry run mode ON');
 
-    readQueryFile('duplicate_user_query.js')
+    readQueryFile('inactive_people_query.js')
       .then(file => executeJQL(mixpanel, file))
       .then(ids => buildOutputFile(ids))
       .catch(error => console.error(error));

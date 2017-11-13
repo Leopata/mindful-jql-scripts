@@ -1,5 +1,5 @@
 import dotenv from 'dotenv'
-import removeDuplicates from './delete_duplicates'
+import removeDuplicates from './delete_inactive_people'
 
 dotenv.config()
 
@@ -9,6 +9,6 @@ const mixpanel = {
   token: process.env.MIXPANEL_API_TOKEN
 };
 
-const dryRun = false;
+const dryRun = true;
 
 removeDuplicates(dryRun, mixpanel)
