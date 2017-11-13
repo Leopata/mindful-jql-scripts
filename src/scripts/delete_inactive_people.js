@@ -22,7 +22,7 @@ const deleteUsers = (dryRun, mixpanel, distinctIds) => {
     console.log(`Deleting ${chunk.length} users...`);
 
     const data = chunk.map(id => ({ $token: mixpanel.token, $distinct_id: id, $delete: true, $ignore_alias: true }));
-    const enc = new Buffer(JSON.stringify(data))//.toString('base64');
+    const enc = new Buffer(JSON.stringify(data)).toString('base64');
     const uri = `https://api.mixpanel.com/engage?data=${enc}&verbose=1`;
 
     return request(uri).then(res => {
