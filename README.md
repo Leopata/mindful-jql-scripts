@@ -1,7 +1,6 @@
 # Mindul Mixpanel JQL
 
 ## General
------
 This is a repository that contains JQL scripts to updated / delete / clean wrong datas in Mixpanel for Mindful.  
 
 ### Authentication
@@ -18,15 +17,14 @@ The repository contains an `index.js` file that imports the scripts and run them
 You'll need to uncomment the line calling the script you want to run (see below).  
 
 ## Active scripts
-------
 These scripts are maintained and used regularly.
+
 ### Delete inactive users
 Finds anonymous people that has no events in a given date range, and deletes them.  
 The date should be set in the `src/jql/inactive_people_query.js`, in the `from_date` and `to_date` keys.  
 Typically, the date range should be the past three months (so `from_date` should be three months ago, and `to_date` should be today).
 
 ## Inactive scripts
-------
 This is a list of scripts that were made by David Miotti, were ran once, and never maintenained afterwards.  
 They can be found (along with their documentation) in the Git history, at commit `0261f880`.
 - Fix first-visit on users
